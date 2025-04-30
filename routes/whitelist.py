@@ -10,6 +10,8 @@ async def add_to_whitelist(payload: AddWhitelistPayload):
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
+    username = payload.username.strip().lower()
+
     existing = db.whitelists.find_one({
         "organization": payload.organization
     })
@@ -19,17 +21,17 @@ async def add_to_whitelist(payload: AddWhitelistPayload):
             "organization": payload.organization,
             "master_user_key": org.get("master_user_key"),
             "whitelist": [
-                {"username": payload.username, "allowed": True}
+                {"username": username, "allowed": True}
             ]
         })
     else:
         whitelist = existing.get("whitelist", [])
-        if any(user["username"] == payload.username for user in whitelist):
+        if any(user["username"].lower() == username for user in whitelist):
             raise HTTPException(status_code=400, detail="User already whitelisted")
 
         db.whitelists.update_one(
             {"organization": payload.organization},
-            {"$push": {"whitelist": {"username": payload.username, "allowed": True}}}
+            {"$push": {"whitelist": {"username": username, "allowed": True}}}
         )
 
     return {"success": True, "message": "User added to whitelist"}
