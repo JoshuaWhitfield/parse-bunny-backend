@@ -81,6 +81,8 @@ async def lookup_and_update_org_user(payload: OrgLookupRequest):
 
     user = next((u for u in user_list if u["username"] == payload.username), None)
 
+    balance = org.get("balance")
+
     if user:
         if payload.cli_user_key:
             # Update the correct user's user_key field
@@ -91,13 +93,15 @@ async def lookup_and_update_org_user(payload: OrgLookupRequest):
             return {
                 "organization_exists": True,
                 "user_exists": True,
-                "cli_user_key_updated": True
+                "cli_user_key_updated": True,
+                "balance": balance
             }
         else:
             return {
                 "organization_exists": True,
                 "user_exists": True,
-                "cli_user_key_updated": False
+                "cli_user_key_updated": False,
+                "balance": balance
             }
     else:
 
